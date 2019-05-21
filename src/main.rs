@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
-use etcdv3client::{kv::SimpleKVClient, EtcdV3Client};
+use etcdv3client::EtcdV3Client;
 use failure::Error;
-use rocksdb::{IteratorMode, Options, DB};
+use rocksdb::{IteratorMode, DB};
 
 use structopt::StructOpt;
 
@@ -13,20 +13,22 @@ enum Opt {
     Dump(DumpCmd),
     #[structopt(name = "restore")]
     Restore(RestoreCmd),
-    #[structopt(name = "debug")]
-    Debug(DebugCmd),
+    #[structopt(name = "print")]
+    Print(PrintCmd),
+    #[structopt(name = "read")]
+    Read(ReadCmd),
 }
 
 #[derive(StructOpt, Debug)]
 struct DumpCmd {
+    #[structopt(long = "host", short = "h")]
+    host: String,
+    #[structopt(long = "port", short = "p")]
+    port: u16,
+    #[structopt(long = "dir", short = "d", parse(from_os_str))]
+    dir: PathBuf,
     #[structopt(long = "all")]
     all: bool,
-    #[structopt(name = "host", short = "h")]
-    host: String,
-    #[structopt(name = "port", short = "p")]
-    port: u16,
-    #[structopt(name = "DIR", short = "d", parse(from_os_str))]
-    dir: PathBuf,
 }
 
 #[derive(StructOpt, Debug)]
@@ -35,13 +37,23 @@ struct RestoreCmd {
     host: String,
     #[structopt(long = "port", short = "p")]
     port: u16,
-    #[structopt(name = "DIR", short = "d", parse(from_os_str))]
+    #[structopt(long = "dir", short = "d", parse(from_os_str))]
     dir: PathBuf,
 }
 
 #[derive(StructOpt, Debug)]
-struct DebugCmd {
-    #[structopt(name = "DIR", short = "d", parse(from_os_str))]
+struct PrintCmd {
+    #[structopt(long = "host", short = "h")]
+    host: String,
+    #[structopt(long = "port", short = "p")]
+    port: u16,
+    #[structopt(long = "all")]
+    all: bool,
+}
+
+#[derive(StructOpt, Debug)]
+struct ReadCmd {
+    #[structopt(long = "dir", short = "d", parse(from_os_str))]
     dir: PathBuf,
 }
 
@@ -53,7 +65,8 @@ fn main() -> Result<(), Error> {
     match opt {
         Opt::Dump(o) => dump_data(&o.host, o.port, &o.dir, o.all)?,
         Opt::Restore(o) => restore_data(&o.host, o.port, &o.dir)?,
-        Opt::Debug(o) => debug_data(&o.dir)?,
+        Opt::Print(o) => print_data(&o.host, o.port, o.all)?,
+        Opt::Read(o) => read_data(&o.dir)?,
     }
 
     Ok(())
@@ -91,7 +104,25 @@ fn restore_data(host: &str, port: u16, path: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-fn debug_data(path: &Path) -> Result<(), Error> {
+fn print_data(host: &str, port: u16, all: bool) -> Result<(), Error> {
+    let etcd_client = EtcdV3Client::new(host, port).unwrap();
+    let client = etcd_client.new_simple_kv();
+
+    let kvs = client.get_all()?;
+    for kv in kvs {
+        if all || kv.lease == 0 {
+            println!(
+                "{} => {}",
+                String::from_utf8_lossy(&kv.key),
+                String::from_utf8_lossy(&kv.value)
+            );
+        }
+    }
+
+    Ok(())
+}
+
+fn read_data(path: &Path) -> Result<(), Error> {
     let db = DB::open_default(path).unwrap();
     let iter = db.iterator(IteratorMode::Start);
 
