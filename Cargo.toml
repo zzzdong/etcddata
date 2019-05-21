@@ -1,0 +1,17 @@
+[package]
+name = "etcddata"
+version = "0.1.0"
+authors = ["zzzdong <kuwater@163.coms>"]
+edition = "2018"
+
+[dependencies]
+env_logger = "0.6"
+failure = "0.1"
+log = "0.4"
+rocksdb = "0.12.2"
+structopt = "0.2"
+etcdv3client = {git="https://github.com/zzzdong/etcdv3client-rust.git"}
+
+[profile.release]
+lto = true
+panic = "abort"
