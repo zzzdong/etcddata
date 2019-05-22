@@ -20,25 +20,27 @@ enum Opt {
 }
 
 #[derive(StructOpt, Debug)]
-struct DumpCmd {
+struct CommOpts {
     #[structopt(long = "host", short = "h")]
     host: String,
     #[structopt(long = "port", short = "p")]
     port: u16,
     #[structopt(long = "dir", short = "d", parse(from_os_str))]
     dir: PathBuf,
+}
+
+#[derive(StructOpt, Debug)]
+struct DumpCmd {
+    #[structopt(flatten)]
+    comm_opts: CommOpts,
     #[structopt(long = "all")]
     all: bool,
 }
 
 #[derive(StructOpt, Debug)]
 struct RestoreCmd {
-    #[structopt(long = "host", short = "h")]
-    host: String,
-    #[structopt(long = "port", short = "p")]
-    port: u16,
-    #[structopt(long = "dir", short = "d", parse(from_os_str))]
-    dir: PathBuf,
+    #[structopt(flatten)]
+    comm_opts: CommOpts,
 }
 
 #[derive(StructOpt, Debug)]
@@ -63,8 +65,8 @@ fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
 
     match opt {
-        Opt::Dump(o) => dump_data(&o.host, o.port, &o.dir, o.all)?,
-        Opt::Restore(o) => restore_data(&o.host, o.port, &o.dir)?,
+        Opt::Dump(o) => dump_data(&o.comm_opts.host, o.comm_opts.port, &o.comm_opts.dir, o.all)?,
+        Opt::Restore(o) => restore_data(&o.comm_opts.host, o.comm_opts.port, &o.comm_opts.dir)?,
         Opt::Print(o) => print_data(&o.host, o.port, o.all)?,
         Opt::Read(o) => read_data(&o.dir)?,
     }
