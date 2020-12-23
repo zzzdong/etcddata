@@ -19,10 +19,8 @@ enum Opt {
 
 #[derive(StructOpt, Debug)]
 struct EtcdOpts {
-    #[structopt(long = "host", short = "h")]
-    host: String,
-    #[structopt(long = "port", short = "p")]
-    port: u16,
+    #[structopt(long = "endpoint", short = "e")]
+    endpoint: String,
     #[structopt(long = "user", short = "u")]
     user: Option<String>,
     #[structopt(long = "password", short = "P")]
@@ -81,11 +79,15 @@ async fn main() -> Result<()> {
 
 async fn connect_etcd(etcd_opts: &EtcdOpts) -> Result<EtcdClient> {
     let mut auth: Option<(String, String)> = None;
-    if let Some(user) = &etcd_opts.user {
-        auth = Some((user.clone(), etcd_opts.password.clone().unwrap()));
+
+    if etcd_opts.user.is_some() && etcd_opts.password.is_some() {
+        auth = Some((
+            etcd_opts.user.clone().unwrap(),
+            etcd_opts.password.clone().unwrap(),
+        ));
     }
 
-    let endpoint = format!("http://{}:{}", etcd_opts.host, etcd_opts.port);
+    let endpoint = etcd_opts.endpoint.to_string();
 
     let client = EtcdClient::new(vec![endpoint], auth).await?;
 

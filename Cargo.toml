@@ -10,7 +10,7 @@ env_logger = "0.8"
 log = "0.4"
 sled = "0.34"
 structopt = "0.3"
-etcdv3client = { git="https://github.com/zzzdong/etcdv3client-rust.git" }
+etcdv3client = "0.1.2"
 tokio = { version="0.2", features=["full"] }
 
 [profile.release]
