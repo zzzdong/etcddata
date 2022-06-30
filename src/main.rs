@@ -2,62 +2,62 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use etcdv3client::EtcdClient;
-use structopt::StructOpt;
+use clap::Parser;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "etcddata", about = "etcd data dump and restore")]
-enum Opt {
-    #[structopt(name = "dump")]
+#[derive(Parser, Debug)]
+#[clap(name = "etcddata", about = "etcd data dump and restore")]
+enum Args {
+    #[clap(name = "dump")]
     Dump(DumpCmd),
-    #[structopt(name = "restore")]
+    #[clap(name = "restore")]
     Restore(RestoreCmd),
-    #[structopt(name = "print")]
+    #[clap(name = "print")]
     Print(PrintCmd),
-    #[structopt(name = "read")]
+    #[clap(name = "read")]
     Read(ReadCmd),
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct EtcdOpts {
-    #[structopt(long = "endpoint", short = "e")]
+    #[clap(long = "endpoint", short = 'e', default_value = "http://localhost:2379")]
     endpoint: String,
-    #[structopt(long = "user", short = "u")]
+    #[clap(long = "user", short = 'u')]
     user: Option<String>,
-    #[structopt(long = "password", short = "P")]
+    #[clap(long = "password", short = 'P')]
     password: Option<String>,
-    #[structopt(long = "prefix")]
+    #[clap(long = "prefix")]
     prefix: Option<String>,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct DumpCmd {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     etcd_opts: EtcdOpts,
-    #[structopt(long = "dir", short = "d", parse(from_os_str))]
+    #[clap(long = "dir", short = 'd', parse(from_os_str))]
     dir: PathBuf,
-    #[structopt(long = "all")]
+    #[clap(long = "all")]
     all: bool,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct RestoreCmd {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     etcd_opts: EtcdOpts,
-    #[structopt(long = "dir", short = "d", parse(from_os_str))]
+    #[clap(long = "dir", short = 'd', parse(from_os_str))]
     dir: PathBuf,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct PrintCmd {
-    #[structopt(flatten)]
+    #[clap(flatten)]
     etcd_opts: EtcdOpts,
-    #[structopt(long = "all")]
+    #[clap(long = "all")]
     all: bool,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct ReadCmd {
-    #[structopt(long = "dir", short = "d", parse(from_os_str))]
+    #[clap(long = "dir", short = 'd', parse(from_os_str))]
     dir: PathBuf,
 }
 
@@ -65,13 +65,13 @@ struct ReadCmd {
 async fn main() -> Result<()> {
     env_logger::init();
 
-    let opt = Opt::from_args();
+    let opt = Args::from_args();
 
     match opt {
-        Opt::Dump(o) => dump_data(&o.etcd_opts, &o.dir, o.all).await?,
-        Opt::Restore(o) => restore_data(&o.etcd_opts, &o.dir).await?,
-        Opt::Print(o) => print_data(&o.etcd_opts, o.all).await?,
-        Opt::Read(o) => read_data(&o.dir)?,
+        Args::Dump(o) => dump_data(&o.etcd_opts, &o.dir, o.all).await?,
+        Args::Restore(o) => restore_data(&o.etcd_opts, &o.dir).await?,
+        Args::Print(o) => print_data(&o.etcd_opts, o.all).await?,
+        Args::Read(o) => read_data(&o.dir)?,
     }
 
     Ok(())
