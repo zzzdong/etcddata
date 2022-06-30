@@ -1,0 +1,29 @@
+name: Rust
+
+on:
+  push:
+    tags: "v*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+    
+      - uses: actions-rs/toolchain@v1
+
+      - name: Build        
+        run: cargo build --release --target=x86_64-unknown-linux-musl
+        
+      - name: Upload Github Assets
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: build/x86_64-unknown-linux-musl/release/*
+
