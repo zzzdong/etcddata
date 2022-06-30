@@ -22,7 +22,11 @@ jobs:
           default: true
 
       - name: Build
-        run: cargo build --release && pwd && ls -al
+        run: |
+         cargo build --release &&
+          mkdir -pv etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH} && 
+          cp target/release/etcddata etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH} -v && 
+          tar czvf etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}.tar.gz etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}
 
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
