@@ -22,13 +22,12 @@ jobs:
           target: x86_64-unknown-linux-musl
           default: true
 
-      - name: Build        
-        run: cargo build --release && pwd && ls -al build && ls -al build/release/ && file /home/runner/work/etcddata/etcddata
+      - name: Build
+        run: cargo build --release && pwd && ls -al
 
-        
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: build/release/*
+          files: etcddata
