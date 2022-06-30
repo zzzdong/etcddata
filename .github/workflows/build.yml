@@ -23,7 +23,8 @@ jobs:
           default: true
 
       - name: Build        
-        run: cargo build --release
+        run: cargo build --release && pwd && ls -al build && ls -al build/release/ && file /home/runner/work/etcddata/etcddata
+
         
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
