@@ -23,12 +23,11 @@ jobs:
           default: true
 
       - name: Build        
-        run: cargo build --release --target=x86_64-unknown-linux-musl
+        run: cargo build --release
         
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: build/x86_64-unknown-linux-musl/release/*
-
+          files: build/release/*
