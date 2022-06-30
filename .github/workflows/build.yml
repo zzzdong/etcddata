@@ -22,7 +22,7 @@ jobs:
           default: true
 
       - name: Build
-        run: sh build.sh
+        run: sh scripts/build.sh
 
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
