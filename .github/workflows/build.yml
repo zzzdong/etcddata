@@ -33,5 +33,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: target/release/*
+          files: etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}.tar.gz
           prerelease: ${{ contains(github.ref, '-') }}
