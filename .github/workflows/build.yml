@@ -22,16 +22,12 @@ jobs:
           default: true
 
       - name: Build
-        run: |
-         cargo build --release &&
-          mkdir -pv etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH} && 
-          cp target/release/etcddata etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH} -v && 
-          tar czvf etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}.tar.gz etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}
+        run: sh build.sh
 
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: etcddata-${GITHUB_REF_NAME}-${RUNNER_OS}-${RUNNER_ARCH}.tar.gz
+          files: build/release/*
           prerelease: ${{ contains(github.ref, '-') }}
